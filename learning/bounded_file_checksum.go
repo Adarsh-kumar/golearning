@@ -129,8 +129,12 @@ func main() {
 	var path string = "C://Users//Administrator//workdir//vic//vic-test-data"
 	calculateMd5(path, 1)
 	fmt.Println(time.Since(start))
+	start = time.Now()
+	fmt.Println("bufferd channel result")
+	calculateMd5Buffered(path, 8)
+	fmt.Println(time.Since(start))
 	/*for _, path := range paths {
 		fmt.Printf("%x  %s\n", m[path], path)
 	}*/
-
 }
+
