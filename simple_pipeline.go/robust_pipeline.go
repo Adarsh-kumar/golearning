@@ -8,7 +8,7 @@ import (
 
 func prepare(done <-chan struct{}, arr []int) <-chan int {
 	// make a channle to push the numbers from array in a channel
-	in := make(chan int, 20)
+	in := make(chan int)
 
 	go func() {
 		for _, n := range arr {
@@ -29,8 +29,8 @@ func fib(n int) int {
 	}
 }
 
-func process(done chan struct{}, in <-chan int) chan int {
-	out := make(chan int, 20)
+func process(done chan struct{}, in <-chan int) <-chan int {
+	out := make(chan int)
 
 	go func() {
 		defer close(out)
@@ -48,11 +48,30 @@ func process(done chan struct{}, in <-chan int) chan int {
 	return out
 }
 
-func merge(done chan struct{}, channels []chan (int)) <-chan (int) {
+func process2(done chan struct{}, in <-chan int) <-chan int {
+        out := make(chan int, 50)
+
+      go  func() {
+                defer close(out)
+                for n := range in {
+                        select {
+                        case out <- fib(n):
+                        case <-done:
+                                return
+                        }
+                }
+        }()
+
+        //close(out)
+
+        return out
+}
+
+func merge(done chan struct{}, channels []<-chan (int)) <-chan (int) {
 	// we need a wait group so that we can wait till every goroutine finishes
 	var wg sync.WaitGroup
 	// make a channel to push the outputs got from the worker goroutines
-	out := make(chan int, 20)
+	out := make(chan int)
 
 	// output function definition
 	output := func(in <-chan int) {
@@ -82,25 +101,25 @@ func merge(done chan struct{}, channels []chan (int)) <-chan (int) {
 
 }
 
-func calculate(n int) <-chan int {
+func calculate(n int) {
 	// list of availble integers
 
 	done := make(chan struct{})
 	defer close(done)
 
-	arr := make([]int, 18)
+	arr := make([]int,50)
 
 	for i := range arr {
-		arr[i] = i
+		arr[i] = 500+i
 	}
 
 	// put these a channel so that i/o can be done concurrently
 
 	in := prepare(done, arr)
 
-	chans := make([]chan int, n)
-	//fmt.Println("number to fan in")
-	//fmt.Println(n)
+	chans := make([] <-chan int, n)
+	fmt.Println("number to fan in")
+	fmt.Println(n)
 	for i := range chans {
 		//chans[i] = make(chan int, 4)
 		chans[i] = process(done, in)
@@ -110,17 +129,35 @@ func calculate(n int) <-chan int {
 
 	// merge the results
 
-	out := merge(done, chans)
-
-	/*for i := range out {
+        for i := range(merge(done,chans)){
 		fmt.Println(i)
-	} */
-	return out
+	}
+	
+}
+
+func normal(){
+        arr := make([]int,50)
+        done := make(chan struct{})
+        defer close(done)
+
+ 	channel2 := make(chan int,50)
+        defer close(channel2)
+        
+        for i := range arr {
+                arr[i] = 500+i
+        }
+        in := prepare(done,arr)
+        process2(done,in)
+        //process(done,in)
+
 
 }
 
 func main() {
 	start := time.Now()
-	calculate(2)
+ 	normal()
 	fmt.Println(time.Since(start))
+        start= time.Now()
+        calculate(8)
+        fmt.Println(time.Since(start))
 }

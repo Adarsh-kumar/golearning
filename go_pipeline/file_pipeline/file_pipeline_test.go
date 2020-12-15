@@ -2,31 +2,32 @@ package main
 
 import "testing"
 
+var path= "/home/hostadmin/pform-onprem" 
 func benchmarkhelper(gr int, b *testing.B) {
-	for i := 0; i < b.N; i++ {
-		calculate(gr)
-	}
+        for i := 0; i < b.N; i++ {
+                calculateMd5(path,gr)
+        }
 }
+
 func BenchmarkCalculate1(b *testing.B) {
 
-	benchmarkhelper(1, b)
+        benchmarkhelper(1, b)
 }
 
-
-func BenchmarkNormal(b *testing.B) {
+func BenchmarkNormal (b *testing.B) {
  for i := 0; i < b.N; i++ {
-             normal()
+  normal(path)
 }
 }
 
 func BenchmarkCalculate4(b *testing.B) {
 
-	benchmarkhelper(4, b)
+        benchmarkhelper(4, b)
 }
 
 func BenchmarkCalculate8(b *testing.B) {
 
-	benchmarkhelper(8, b)
+        benchmarkhelper(8, b)
 }
 
 func BenchmarkCalculate16(b *testing.B) {
@@ -34,11 +35,3 @@ func BenchmarkCalculate16(b *testing.B) {
         benchmarkhelper(16, b)
 }
 
-func BenchmarkCalculate32(b *testing.B) {
-
-        benchmarkhelper(32, b)
-}
-
-func BenchmarkCalculate48(b *testing.B) {
-	benchmarkhelper(48, b)
-}

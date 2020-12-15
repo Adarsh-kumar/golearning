@@ -2,6 +2,7 @@ package main
 import ( "fmt"
   "sync"
   "time"
+//"runtime"
 )
 
 func fib(n int) int {
@@ -77,19 +78,31 @@ func makeRange(min, max int) []int {
 
 func normal(arr []int){
 
-
+   start:= time.Now()
+   t := time.Now()
+   maxt := t.Sub(start)
+   
    for i :=range arr{
+   start=time.Now()
    fmt.Println(fib(arr[i]))
+   t = time.Now()
+   if(maxt < t.Sub(start)){
+   maxt= t.Sub(start)
 }
+   fmt.Println("Time taken in this element ",t.Sub(start))
 }
+fmt.Println("Max sequential time ",maxt)
+
+}
+
 func calculate(numberofgr int ) {
 
     // Set up the pipeline.
-    arr:= makeRange(40,50)
+    arr:= makeRange(43,50)
 //    start := time.Now()
 //    normal(arr)
 //    fmt.Println("took ", time.Since(start))
-    start := time.Now()
+//    start := time.Now()
     c := generate(arr)
     
     channels :=make([]<-chan int,numberofgr)
@@ -102,7 +115,7 @@ func calculate(numberofgr int ) {
     ans := make([]int, 11)
     var index int= 0
     for n := range merge(channels) {
-        //fmt.Println(n) 
+        fmt.Println(n) 
         ans[index]=n
         index++  
         // 4 then 9, or 9 then 4
@@ -113,6 +126,10 @@ func calculate(numberofgr int ) {
 }
 
 func main(){
-fmt.Println("go")
+arr := makeRange(43,50)
+normal(arr)
+start:= time.Now()
+calculate(8)
+//fmt.Printf("GOMAXPROCS is %d\n",runtime.GOMAXPROCS(0))
+fmt.Println("go", time.Since(start))
 }
-
