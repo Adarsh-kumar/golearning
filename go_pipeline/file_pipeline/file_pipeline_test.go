@@ -2,7 +2,7 @@ package main
 
 import "testing"
 
-var path = "C://Users//Administrator"
+var path = "C://Users//Administrator//Downloads//checksum_data"
 
 func benchmarkhelper(gr int, b *testing.B) {
 	for i := 0; i < b.N; i++ {
