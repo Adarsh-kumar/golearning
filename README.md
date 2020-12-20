@@ -9,6 +9,12 @@ go to  folder- go_pipeline/file_pipeline
 bounded_file_checksum.go - code file
 file_pipeline_test.go - Benchmark test file 
 
+change the path variable to a local folder(having some mb of data) of your machine.
+
+run -
+go build bounded_file_checksum.go
+./bounded_file_checksum.exe
+
 What I am able to do till now 
 ------------------------------------------
 1. Minimum sync block of goroutines due to channel syncronisation.
