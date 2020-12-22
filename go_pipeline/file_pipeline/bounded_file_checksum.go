@@ -2,6 +2,10 @@ package main
 
 import (
 	"crypto/md5"
+	"log"
+	"runtime"
+	"runtime/pprof"
+
 	//	"errors"
 	"fmt"
 	"io/ioutil"
@@ -9,6 +13,7 @@ import (
 	"path/filepath"
 
 	//         "sort"
+
 	"sync"
 	"time"
 )
@@ -103,7 +108,7 @@ func prepareResult(ans <-chan result) (map[string][md5.Size]byte, error) {
 // MD5All reads all the files in the file tree rooted at root and returns a map
 // from file path to the MD5 sum of the file's contents.
 
-func MD5All(root string, maxgr int) <-chan result {
+func MD5All(root string, maxgr int) (map[string][md5.Size]byte, error) {
 
 	paths, errc := walkFiles(root)
 
@@ -113,8 +118,9 @@ func MD5All(root string, maxgr int) <-chan result {
 	//defer close(resultchans)
 	//	var wg sync.WaitGroup
 	//	numDigesters := maxgr
-	//	wg.Add(numDigesters)
-	for i := range resultchans {
+	//wg.Add(numDigesters)
+	for i := 0; i < maxgr; i++ {
+		//fmt.Println(i)
 		resultchans[i] = digester(paths)
 	}
 
@@ -124,77 +130,70 @@ func MD5All(root string, maxgr int) <-chan result {
 	}()*/
 
 	ans := merge(resultchans)
-	for c := range ans {
-		_ = c
-		//fmt.Println(c.path, c.sum)
+	m := make(map[string][md5.Size]byte)
+	for r := range ans {
+		if r.err != nil {
+			return nil, r.err
+		}
+		m[r.path] = r.sum
 	}
 	// Check whether the Walk failed.
 	if err := <-errc; err != nil { // HLerrc
-		fmt.Println("inside error", err)
-		return nil
+		return nil, err
 	}
-
-	//m,err:= prepareResult(ans)
-	return ans
+	return m, nil
 
 }
 
-func MD5Allsync(root string, maxgr int) <-chan result {
-
-	paths, errc := walkFiles(root)
-
-	// Create a list of channels that will be store the result of eaach digester
-	resultchans := make([]<-chan result, maxgr)
-	//defer close(resultchans)
-	var wg sync.WaitGroup
-	numDigesters := maxgr
-	wg.Add(numDigesters)
-	for i := range resultchans {
-		resultchans[i] = digester(paths)
-	}
-
-	// wait for all goroutines to complete
-	go func() {
-		wg.Wait()
-	}()
-
-	ans := merge(resultchans)
-	for c := range ans {
-		_ = c
-	}
-	// Check whether the Walk failed.
-	if err := <-errc; err != nil { // HLerrc
-		fmt.Println("inside error")
-		return nil
-	}
-
-	//m,err:= prepareResult(ans)
-	return ans
-
-}
-
-func calculateMd5(path string, maxgr int) <-chan result {
+func calculateMd5(path string, maxgr int) {
 	// Calculate the MD5 sum of all files under the specified directory,
 	// then print the results sorted by path name.
 	// ans := MD5All(path, maxgr)
-	ans := MD5All(path, maxgr)
 
-	return ans
-	/*	var paths []string
-			if err != nil {
-				fmt.Println(err)
-				return m, paths
-			}
+	var mem runtime.MemStats
 
-			for path := range m {
-				paths = append(paths, path)
-			}
-			sort.Strings(paths)
-			for _, path := range paths {
-				fmt.Printf("%x  %s\n", m[path], path)
-			}
-		        return m, paths
-	*/
+	fmt.Println("memory baseline...")
+
+	runtime.ReadMemStats(&mem)
+	log.Println(mem.Alloc)
+	log.Println(mem.TotalAlloc)
+	log.Println(mem.HeapAlloc)
+	log.Println(mem.HeapSys)
+
+	m, err := MD5All(path, maxgr)
+
+	fmt.Println("memory comparison...")
+
+	f, err2 := os.Create("mem16.out")
+	if err2 != nil {
+		log.Fatal(err2)
+	}
+	pprof.WriteHeapProfile(f)
+	f.Close()
+
+	runtime.ReadMemStats(&mem)
+	log.Println(mem.Alloc)
+	log.Println(mem.TotalAlloc)
+	log.Println(mem.HeapAlloc)
+	log.Println(mem.HeapSys)
+
+	_ = m
+	_ = err
+
+	/*var paths []string
+	if err != nil {
+		fmt.Println(err)
+		//return m, paths
+	}
+
+	for path := range m {
+		paths = append(paths, path)
+	}
+	sort.Strings(paths)
+	for _, path := range paths {
+		fmt.Printf("%x  %s\n", m[path], path)
+	}*/
+
 }
 
 func normal(root string) error {
@@ -228,20 +227,13 @@ func normal(root string) error {
 	return nil
 }
 
-func init() {
-
-	os.Setenv("GODEBUG", "gctrace=1")
-
-}
-
 func main() {
 
 	//fmt.Println("Al")
 	fmt.Println("GODEBUG", os.Getenv("GODEBUG"))
-
 	start := time.Now()
 	var path string = "C://Users//Administrator//Downloads//checksum_data"
-	_ = calculateMd5(path, 16)
+	calculateMd5(path, 16)
 	fmt.Println("time taken ", time.Since(start))
 	/*for _, path := range paths {
 		fmt.Printf("%x  %s\n", m[path], path)

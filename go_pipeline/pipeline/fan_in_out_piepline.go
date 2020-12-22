@@ -99,7 +99,7 @@ func normal(arr []int) {
 func calculate(numberofgr int) {
 
 	// Set up the pipeline.
-	arr := makeRange(43, 50)
+	arr := makeRange(25, 40)
 	//    start := time.Now()
 	//    normal(arr)
 	//    fmt.Println("took ", time.Since(start))
@@ -113,7 +113,7 @@ func calculate(numberofgr int) {
 	}
 
 	// Consume the merged output from c1 and c2.
-	ans := make([]int, 11)
+	ans := make([]int, numberofgr)
 	var index int = 0
 	for n := range merge(channels) {
 		//      fmt.Println(n)
@@ -127,7 +127,7 @@ func calculate(numberofgr int) {
 }
 
 func main() {
-	arr := makeRange(43, 50)
+	arr := makeRange(15, 40)
 	normal(arr)
 	start := time.Now()
 	calculate(8)

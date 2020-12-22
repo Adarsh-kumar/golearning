@@ -8,6 +8,7 @@ func benchmarkhelper(gr int, b *testing.B) {
 	}
 }
 
+/*
 func BenchmarkCalculate1(b *testing.B) {
 
 	benchmarkhelper(1, b)
@@ -27,9 +28,14 @@ func BenchmarkCalculate4(b *testing.B) {
 func BenchmarkCalculate8(b *testing.B) {
 
 	benchmarkhelper(8, b)
-}
+} */
 
-func BenchmarkCalculate11(b *testing.B) {
+func BenchmarkCalculate16(b *testing.B) {
 
 	benchmarkhelper(16, b)
+}
+
+func BenchmarkCalculate30(b *testing.B) {
+
+	benchmarkhelper(30, b)
 }
