@@ -2,9 +2,11 @@ package main
 
 import (
 	"crypto/md5"
+	"io"
 	"log"
 	"runtime"
 	"runtime/pprof"
+	"sort"
 
 	//	"errors"
 	"fmt"
@@ -46,7 +48,7 @@ func walkFiles(root string) (<-chan string, <-chan error) {
 // A result is the product of reading and summing a file using MD5.
 type result struct {
 	path string
-	sum  [md5.Size]byte
+	sum  []byte
 	err  error
 }
 
@@ -57,8 +59,23 @@ func digester(paths <-chan string) <-chan result {
 	//  defer close(resultchan)
 	go func() {
 		for path := range paths { // HLpaths
-			data, err := ioutil.ReadFile(path)
-			resultchan <- result{path, md5.Sum(data), err}
+
+			f, err := os.Open(path)
+			defer f.Close()
+
+			h := md5.New()
+
+			if err != nil {
+				//log.Fatal(err)
+				resultchan <- result{path, h.Sum(nil), err}
+			} else {
+
+				if _, err := io.Copy(h, f); err != nil {
+					log.Fatal(err)
+				}
+
+				resultchan <- result{path, h.Sum(nil), err}
+			}
 
 		}
 		close(resultchan)
@@ -94,8 +111,8 @@ func merge(resultchans []<-chan result) <-chan result {
 	return out
 }
 
-func prepareResult(ans <-chan result) (map[string][md5.Size]byte, error) {
-	m := make(map[string][md5.Size]byte)
+func prepareResult(ans <-chan result) (map[string][]byte, error) {
+	m := make(map[string][]byte)
 	for r := range ans {
 		if r.err != nil {
 			return nil, r.err
@@ -108,7 +125,7 @@ func prepareResult(ans <-chan result) (map[string][md5.Size]byte, error) {
 // MD5All reads all the files in the file tree rooted at root and returns a map
 // from file path to the MD5 sum of the file's contents.
 
-func MD5All(root string, maxgr int) (map[string][md5.Size]byte, error) {
+func MD5All(root string, maxgr int) (map[string][]byte, error) {
 
 	paths, errc := walkFiles(root)
 
@@ -130,7 +147,7 @@ func MD5All(root string, maxgr int) (map[string][md5.Size]byte, error) {
 	}()*/
 
 	ans := merge(resultchans)
-	m := make(map[string][md5.Size]byte)
+	m := make(map[string][]byte)
 	for r := range ans {
 		if r.err != nil {
 			return nil, r.err
@@ -180,7 +197,7 @@ func calculateMd5(path string, maxgr int) {
 	_ = m
 	_ = err
 
-	/*var paths []string
+	var paths []string
 	if err != nil {
 		fmt.Println(err)
 		//return m, paths
@@ -192,7 +209,7 @@ func calculateMd5(path string, maxgr int) {
 	sort.Strings(paths)
 	for _, path := range paths {
 		fmt.Printf("%x  %s\n", m[path], path)
-	}*/
+	}
 
 }
 
@@ -230,10 +247,10 @@ func normal(root string) error {
 func main() {
 
 	//fmt.Println("Al")
-	fmt.Println("GODEBUG", os.Getenv("GODEBUG"))
+	//fmt.Println("GODEBUG", os.Getenv("GODEBUG"))
 	start := time.Now()
 	var path string = "C://Users//Administrator//Downloads//checksum_data"
-	calculateMd5(path, 16)
+	calculateMd5(path, 1)
 	fmt.Println("time taken ", time.Since(start))
 	/*for _, path := range paths {
 		fmt.Printf("%x  %s\n", m[path], path)
