@@ -6,7 +6,7 @@ var path = "C://Users//Administrator//Downloads//checksum_data"
 
 func benchmarkhelper(gr int, b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		calculateMd5(path, gr)
+		calculateMd5(path, gr, false, false)
 	}
 }
 
