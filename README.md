@@ -18,29 +18,34 @@ go build bounded_file_checksum.go
 What I am able to do till now 
 ------------------------------------------
 1. Minimum sync block of goroutines due to channel syncronisation.
-2. Minimize lock contention using seprate channels to push result of each goroutine w.r.t shared channel.
-3. Graceful error handling.
-4. Tuning garbage collection parameter to decraese tool frequent garbage collection (every five millisecond), which improved scalability.
-5. Collect profiling data ( cpuprofile,blocking profile, goroutine trace etc attached in go_pipeline/file_pipeline folder ) and understand every espect of excution. 
+2. Graceful error handling and cencelling handling (SIGTERM) to avoid any memory memory leak.
+3. Written beanchmark tests.
+4. Collect profiling data ( cpuprofile,blocking profile, goroutine trace etc attached in go_pipeline/file_pipeline folder ) and understand every espect of excution. 
+5. Avoided reading full file in memory and doing operation at once which was causing too frequent GC, and used the io.Writer interface of MD5 and process chunk by chunk.
 
 Results of benchmark test
-------------------------------------------
+----------------------------------------------------------------
+go test -bench=BenchmarkCalculate -benchtime=30s
 
 goos: windows
 goarch: amd64
-BenchmarkCalculate1-16                 8        8003875975 ns/op
-BenchmarkNormal-16                     8        7939249962 ns/op
-BenchmarkCalculate4-16                28        2317645121 ns/op
-BenchmarkCalculate8-16                50        1310940174 ns/op
-BenchmarkCalculate16-16               75        1129502856 ns/op
+
+| BenchmarkCalculate1-16 |            |   5   |     | 7059610060 ns/op |
+| BenchmarkCalculate4-16 |             |  18  |     | 1840480306 ns/op |
+BenchmarkCalculate8-16                37         952633289 ns/op
+BenchmarkCalculate16-16               67         536108457 ns/op
+BenchmarkCalculate32-16               64         553310138 ns/op
+BenchmarkCalculate64-16               63         568016006 ns/op
 PASS
 
 where suffix 1-16 means that one goroutine was launched on 16 represents the numberr of cores on my machine.
 
-Note that using one goroutine we are doing the task in around 8 seconds while with 16 goroutines we are close to one second.
+The second column means how many time program was executed in 30 seconds and last columns says time per execution.
 
-Further improvement 
+Note that using one goroutine we are doing the task in around 7 seconds while with 16 goroutines we are close to one 500 millisecond.
+
+Further Work
 -------------------------------------------
+Make this frameworrk more generic.
 
-I checked the cpu profile and it shows around 20 % of the total time taken is used in sync block and syscall blocking. I am trying to understand and remove that overhead.
 
