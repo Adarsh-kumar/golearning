@@ -36,8 +36,8 @@ go test -bench=BenchmarkCalculate -benchtime=30s
 goos: windows
 goarch: amd64
 
-| BenchmarkFunction | | total calls | | time taken per call |
-| --------------- | --------------- | --------------- |
+| BenchmarkFunction | total calls | time taken per call |
+| ----------------- | ----------- | --------------- |
 | BenchmarkCalculate1-16 |            |   5   |     | 7059610060 ns/op |
 | BenchmarkCalculate4-16 |             |  18  |     | 1840480306 ns/op |
 BenchmarkCalculate8-16                37         952633289 ns/op
