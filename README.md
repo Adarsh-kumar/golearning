@@ -24,11 +24,6 @@ What I am able to do till now
 5. Avoided reading full file in memory and doing operation at once which was causing too frequent GC, and used the io.Writer interface of MD5 and process chunk by chunk.
 
 
-First Header | Second Header
------------- | -------------
-Content from cell 1 | Content from cell 2
-Content in the first column | Content in the second column
-
 Results of benchmark test
 ----------------------------------------------------------------
 go test -bench=BenchmarkCalculate -benchtime=30s
@@ -38,12 +33,13 @@ goarch: amd64
 
 | BenchmarkFunction | total calls | time taken per call |
 | ----------------- | ----------- | --------------- |
-| BenchmarkCalculate1-16 |            |   5   |     | 7059610060 ns/op |
-| BenchmarkCalculate4-16 |             |  18  |     | 1840480306 ns/op |
-BenchmarkCalculate8-16                37         952633289 ns/op
-BenchmarkCalculate16-16               67         536108457 ns/op
-BenchmarkCalculate32-16               64         553310138 ns/op
-BenchmarkCalculate64-16               63         568016006 ns/op
+| BenchmarkCalculate1-16 |     5   |   7059610060 ns/op |
+| BenchmarkCalculate4-16 |     18  |   1840480306 ns/op |
+| BenchmarkCalculate8-16 |              37 |        952633289 ns/op |
+| BenchmarkCalculate16-16 |             67 |       536108457 ns/op |
+| BenchmarkCalculate32-16 |             64 |        553310138 ns/op |
+| BenchmarkCalculate64-16 |              63 |        568016006 ns/op |
+
 PASS
 
 where suffix 1-16 means that one goroutine was launched on 16 represents the numberr of cores on my machine.
