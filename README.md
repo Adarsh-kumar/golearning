@@ -7,13 +7,22 @@ I took the example problem from Sameer Ajmani's blog Go concurrency pipeline and
 go to  folder- go_pipeline/file_pipeline
 
 bounded_file_checksum.go - code file
+
 file_pipeline_test.go - Benchmark test file 
 
 change the path variable to a local folder(having some mb of data) of your machine.
 
 run -
 go build bounded_file_checksum.go
-./bounded_file_checksum.exe
+./bounded_file_checksum.exe 
+
+flags option -
+
+-gr - pass the number of goroutine you want to launch for hash calculation.
+-printresult - print the result  of each file otherwise retruns  a map.
+
+for more get help -  go run .\bounded_file_checksum.go -h
+
 
 What I am able to do till now 
 ------------------------------------------
