@@ -2,7 +2,7 @@
 
 Golang concurrency practice
 
-I took the example problem from Sameer Ajmani's blog Go concurrency pipeline and cencellation, and wrote a fan-in-out pipeline,benchmark tests and  improved the scalability to calculate the checksum of a files concurrently. Some details are described below.
+I took the example problem from Sameer Ajmani's blog Go concurrency pipeline and cencellation, wrote a fan-in-out pipeline,benchmark tests and  improved the scalability to calculate the checksum of files concurrently. Some details are described below.
 
 go to  folder- go_pipeline/file_pipeline
 
